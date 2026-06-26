@@ -1,0 +1,83 @@
+spring:
+  application:
+    name: ticket-triage
+  datasource:
+    # H2 in PostgreSQL-compatibility mode so the same Flyway migration runs locally and in prod.
+    url: jdbc:h2:mem:tickets;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    # Flyway owns the schema; Hibernate only validates that the entities match it.
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+# ---------------------------------------------------------------------------
+# Application config
+# ---------------------------------------------------------------------------
+app:
+  security:
+    # API key required on /api/** via the X-API-Key header. Override in prod.
+    api-key: ${API_KEY:local-dev-key}
+    header-name: X-API-Key
+
+# Triage configuration (bound by TriageProperties).
+# mode = stub -> offline rule-based classifier (default, no network)
+# mode = llm  -> calls an Anthropic-style /v1/messages endpoint via WebClient
+triage:
+  mode: ${TRIAGE_MODE:stub}
+  api-url: ${ANTHROPIC_BASE_URL:https://api.anthropic.com}
+  api-key: ${ANTHROPIC_API_KEY:}
+  model: claude-haiku-4-5-20251001
+  max-tokens: 256
+  anthropic-version: "2023-06-01"
+  timeout-seconds: 20
+  max-retries: 2
+
+# Bounded executor for asynchronous triage processing.
+async:
+  triage:
+    core-pool-size: 2
+    max-pool-size: 8
+    queue-capacity: 500
+
+# ---------------------------------------------------------------------------
+# Observability
+# ---------------------------------------------------------------------------
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  info:
+    env:
+      enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+info:
+  app:
+    name: ticket-triage
+    description: IT incident-ticket triage REST service
+
+logging:
+  level:
+    com.example.tickettriage: INFO
