@@ -19,12 +19,13 @@ The easiest way — nothing to install:
    ```
 3. When the **8080** port notification appears, click **Open in Browser**, then add `/swagger-ui.html` to the URL. Click **Authorize**, paste `local-dev-key`, and try the endpoints.
 
-Locally instead? You only need **JDK 17** (no Maven — the wrapper handles it):
-```bash
-./mvnw spring-boot:run            # macOS/Linux
-.\mvnw.cmd spring-boot:run        # Windows PowerShell
-```
+## Running locally
 
+Choose the option that fits your environment:
+
+- **Maven wrapper (macOS/Linux):** `./mvnw spring-boot:run`
+- **Windows launcher:** run `run.cmd` from Command Prompt or `.\run.ps1` from PowerShell.
+- **Docker Compose (app + PostgreSQL):** `docker compose up --build` using `docker-compose.yml`.
 
 ## Highlights
 
